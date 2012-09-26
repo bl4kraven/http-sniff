@@ -1,0 +1,9 @@
+[submodule "SimpleNet"]
+	path = SimpleNet
+	url = git@github.com:lbzhung/SimpleNet.git
+[submodule "http-parser"]
+	path = http-parser
+	url = git://github.com/joyent/http-parser.git
+[submodule "lib-linux"]
+	path = lib-linux
+	url = git@github.com:lbzhung/lib-linux.git
