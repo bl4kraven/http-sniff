@@ -1,10 +1,14 @@
 CXX=g++
 #CPPFLAGS=-Wall -g -O2 
-CPPFLAGS=-Wall -g -D_DEBUG 
+CPPFLAGS=-Wall -g -D_DEBUG -I.
 LDFLAGS= -Lhttp-parser -LSimpleNet
+# source code root dir
+SOURCE_DIR=src/
+FILES=$(shell find $(SOURCE_DIR) -name "*.cpp")
+HEADERS=$(shell find $(SOURCE_DIR) -name "*.h")
 LIBS= -lsimple_net -lhttp_parser
-OBJECTS=http_sniff.o http_connect_session.o http_sniff_session.o
 DEPEND=SimpleNet/libsimple_net.a http-parser/libhttp_parser.a
+OBJECTS=$(FILES:.cpp=.o)
 TARGET=http_sniff
 
 all:simplenet $(TARGET) 
@@ -13,27 +17,14 @@ all:simplenet $(TARGET)
 simplenet:
 	make -C SimpleNet
 
-$(TARGET):$(OBJECTS) $(DEPEND)
+# include all source file depends.
+-include Makefile.deps
+
+$(TARGET): Makefile.deps $(OBJECTS) $(DEPEND)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS) $(LIBS)
 
-# pull in dependency info for *existing* .o files
--include $(OBJECTS:.o=.d)
-
-# compile and generate dependency info;
-# more complicated dependency computation, so all prereqs listed
-# will also become command-less, prereq-less targets
-#   sed:    strip the target (everything before colon)
-#   sed:    remove any continuation backslashes
-#   fmt -1: list words one per line
-#   sed:    strip leading spaces
-#   sed:    add trailing colons
-$(OBJECTS):%.o:%.cpp
-	$(CXX) $(CPPFLAGS) -c $< -o $@
-	$(CXX) -MM $(CPPFLAGS) $*.cpp > $*.d
-	@cp -f $*.d $*.d.tmp
-	@sed -e 's/.*://' -e 's/\\$$//' < $*.d.tmp | fmt -1 | \
-		sed -e 's/^ *//' -e 's/$$/:/' >> $*.d
-	@rm -f $*.d.tmp
+Makefile.deps: $(FILES) $(HEADERS)
+	./makedepend -f "$(FILES)" -c "$(CXX)" -p "$(CPPFLAGS)" > Makefile.deps
 
 clean:
-	-rm -f *.o *.d $(TARGET)
+	-rm -f $(OBJECTS) $(TARGET) Makefile.deps

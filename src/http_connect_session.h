@@ -3,7 +3,7 @@
 
 #include "config.h"
 #include "lib-linux/buffer.h"
-#include "SimpleNet/snet.h"
+#include "SimpleNet/Src/snet.h"
 
 class HTTPConnectSession:public snet::ISession
 {

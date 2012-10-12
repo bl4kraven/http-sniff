@@ -4,7 +4,7 @@
 #include "config.h"
 #include "http-parser/http_parser.h"
 #include "lib-linux/buffer.h"
-#include "SimpleNet/snet.h"
+#include "SimpleNet/Src/snet.h"
 
 #include "http_connect_session.h"
 

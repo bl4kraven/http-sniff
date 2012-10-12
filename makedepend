@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Generate C/C++ file make depend file: Makefile.depends.
+# Usage:
+#    -f files -c (gcc|g++) -p flags
+
+help() 
+{
+    echo "${0#*/} -f files -c (gcc|g++) -p flags"
+}
+
+while getopts "hf:c:p:" opt; do
+    case $opt in
+        h)
+            help
+            exit 0
+            ;;
+        f)
+            files=$OPTARG
+            ;;
+
+        c)
+            compiler=$OPTARG
+            ;;
+
+        p)
+            flags=$OPTARG
+            ;;
+        *)
+            exit 1
+            ;;
+    esac
+done
+
+
+if [ -z "$files" ] || [ -z "$compiler" ] || [ -z "$flags" ] ; then
+    exit 1
+fi
+
+for file in $files
+do
+    obj=${file/.*/.o}
+    result=`$compiler -MM $flags $file`
+    if [ $? != 0 ] ; then
+        exit 1
+    fi
+
+    result=${result/*:/$obj:}
+    echo $result | sed -e 's/\\//g'
+    # add all file as target, so rename file will not error.
+    echo $result | sed -e 's/.*://' -e 's/\\//g' | fmt -1 | sed -e 's/^ *//' -e 's/$/:/'
+done
